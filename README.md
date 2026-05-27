@@ -1,27 +1,69 @@
-# Fall Detection via Computer Vision
+# Fall Detection for IoT Small Sensors
 
-A deep learning pipeline for **automatic fall detection** from video, combining optical flow analysis with pose estimation on the IMVIA benchmark dataset.
+**Ho Ko · Yueqi Liu · Jiaxin Xie** — ECE, University of Waterloo
 
 📄 **[Read the Paper](https://github.com/woodyhoko/Fall_Detection/blob/main/paper.pdf)**
 
 ---
 
-## Overview
+## Abstract
 
-Falls are a leading cause of injury, particularly among the elderly. This project develops an automated detection system that identifies fall events in video sequences without wearable sensors.
+> *We propose two system frameworks for elderly fall detection deployable on ESP32-cam devices under $9 USD — combining CNN and RNN models with distributed and centralized IoT architectures for cost-efficient, low-power fall detection.*
 
-The pipeline:
-1. **Optical flow** estimation to capture inter-frame motion magnitude
-2. **Pose keypoint** extraction per frame
-3. **Classification** of fall vs. non-fall sequences using a trained model
+Falls are the leading cause of injury among the elderly. Existing solutions are either expensive (depth cameras, Kinect), require complex wearable setups, or demand too much compute for cheap IoT devices. This paper proposes ML models specifically designed to run on the **ESP32-cam** — a $9 microcontroller with an integrated camera — making the system accessible and scalable for home deployment.
+
+---
+
+## Key Contributions
+
+### 1. Two IoT System Architectures
+
+**Distributed Analysis**
+```
+[ESP32-cam] ──► [Local ML inference] ──► [Cloud alert]
+[ESP32-cam] ──► [Local ML inference] ──► [Cloud alert]
+```
+Each sensor runs the full model locally. Simple to set up and expand. Higher compute requirement per device, but fully autonomous.
+
+**Centralized Analysis**
+```
+[ESP32-cam] ──► feature vectors ──► [Raspberry Pi 4] ──► [Cloud alert]
+[ESP32-cam] ──► feature vectors ──┘
+```
+Sensors handle only feature extraction; a central Raspberry Pi 4 performs fall classification. Lower per-sensor compute, more flexible task extension, but requires local network infrastructure.
+
+### 2. Two Detection Models
+
+The analysis pipeline has two stages:
+1. **Feature Extraction** — CNN-based spatial feature extraction from video frames
+2. **Temporal Classification** — RNN-based sequence classifier that detects the fall event pattern across time
+
+Both models are designed to be lightweight enough to partially or fully execute on ESP32-class hardware.
+
+---
+
+## Why ESP32-cam?
+
+| Solution Type | Cost | Power | Deployment |
+|---|---|---|---|
+| Kinect / depth camera | High | High | Complex |
+| Wearable (accelerometer) | Medium | Medium | User compliance issues |
+| Raspberry Pi + USB camera | ~$91 | Medium | Limited range per device |
+| **ESP32-cam (ours)** | **<$9** | **Low** | **Simple, scalable** |
 
 ---
 
 ## Dataset
 
-**[IMVIA Fall Detection Dataset](https://imvia.u-bourgogne.fr/en/database/fall-detection-dataset-2.html)** — a public benchmark containing annotated video sequences of fall and daily-living activities recorded in a controlled environment.
+**[IMVIA Fall Detection Dataset](https://imvia.u-bourgogne.fr/en/database/fall-detection-dataset-2.html)** — a public benchmark of annotated video sequences of fall events and daily-living activities (walking, sitting, lying for rest) recorded in a controlled environment.
 
-The dataset annotations are processed in `dataset_generation.ipynb` before model training.
+Key challenge: distinguishing a fall from intentional floor activity (yoga, resting), which many existing systems fail at.
+
+---
+
+## Results
+
+Model 2 (the centralized architecture with separate feature extraction and RNN classification) proved more accurate than Model 1 and is the recommended configuration for real deployments. Full quantitative results are in the paper (Section 4).
 
 ---
 
@@ -29,27 +71,31 @@ The dataset annotations are processed in `dataset_generation.ipynb` before model
 
 | File | Description |
 |---|---|
-| `dataset_generation.ipynb` | Dataset loading, frame extraction, annotation preprocessing |
-| `fall detection.ipynb` | Model training, evaluation, and results |
-| `fall_model.h5` | Saved Keras model weights |
-| `flowmodel.h5` | Saved optical flow model weights |
-| `FallDataset_anno.zip` | Dataset annotations |
-| `paper.pdf` | Full research paper |
+| `dataset_generation.ipynb` | Frame extraction, annotation parsing, train/val split |
+| `fall detection.ipynb` | Model training, evaluation, result charts |
+| `fall_model.h5` | Saved Keras weights — main fall detection model |
+| `flowmodel.h5` | Saved Keras weights — optical flow auxiliary model |
+| `FallDataset_anno.zip` | IMVIA dataset annotations |
+| `paper.pdf` | Full paper (9 pages) — IEEE format |
 
 ---
 
 ## Stack
 
 - Python, TensorFlow / Keras
-- OpenCV (optical flow)
+- OpenCV (frame extraction, optical flow)
 - Jupyter Notebooks
 
 ---
 
-## Usage
+## Run
 
 ```bash
-pip install tensorflow opencv-python jupyter
+pip install tensorflow opencv-python jupyter numpy
+# Step 1: preprocess dataset
+jupyter notebook dataset_generation.ipynb
+# Step 2: train and evaluate
 jupyter notebook "fall detection.ipynb"
 ```
 
+> Pre-trained weights (`fall_model.h5`, `flowmodel.h5`) are included — skip Step 1 to evaluate directly.
