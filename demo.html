@@ -47,6 +47,12 @@
   <button class="bs" id="restBtn">🛌 Floor Rest (hard case)</button>
   <button class="bs" id="resetBtn">↺ Reset</button>
 </div>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:12px;color:#8b949e">
+  <label for="threshSlider">Detection threshold:</label>
+  <input id="threshSlider" type="range" min="10" max="90" value="50" style="width:140px;accent-color:#f85149">
+  <span id="threshVal" style="color:#f85149;font-variant-numeric:tabular-nums;min-width:32px">0.50</span>
+  <span style="color:#8b949e">— lower = more sensitive, higher = fewer false alarms</span>
+</div>
 
 <div class="stage-flow">
   <div class="sf-box" id="sf0">📹 ESP32-cam</div><div class="sf-arrow">→</div>
@@ -89,7 +95,8 @@
 let frameNum=0,raf=null,running=true;
 let activity='walk'; // walk | fall | rest
 let fallProbs=[],rnnStates=[];
-const THRESHOLD=0.5;
+let THRESHOLD=0.5;
+document.getElementById('threshSlider').oninput=e=>{THRESHOLD=e.target.value/100;document.getElementById('threshVal').textContent=THRESHOLD.toFixed(2);};
 let alertActive=false,alertFrames=0;
 
 function sigmoid(x){return 1/(1+Math.exp(-x));}
