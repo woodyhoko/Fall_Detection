@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fall Detection for IoT Small Sensors</title>
+<meta name="description" content="Two CNN+RNN detection frameworks for elderly fall detection deployable on sub-$9 ESP32-cam devices — privacy-preserving, on-device.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#071014;--ink:#e6f6f7;--muted:#7fa3a8;--tl:#22d3c5;--bl:#38bdf8;--rd:#fb7185;--line:rgba(255,255,255,.08)}
+  *{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,sans-serif;line-height:1.6;overflow-x:hidden}
+  a{color:inherit;text-decoration:none}
+  .bg{position:fixed;inset:0;z-index:0;background:radial-gradient(900px 600px at 75% 0,#0b2127 0,var(--bg) 60%)}
+  .ekg{position:fixed;left:0;right:0;top:0;z-index:1;height:100%;opacity:.45}
+  .wrap{position:relative;z-index:3;max-width:1020px;margin:0 auto;padding:0 24px}
+  header{min-height:90vh;display:flex;flex-direction:column;justify-content:center;padding:80px 0 36px}
+  .tag{display:inline-flex;align-items:center;gap:8px;font-family:"JetBrains Mono";font-size:12px;letter-spacing:1px;color:var(--tl);border:1px solid var(--line);border-radius:100px;padding:6px 14px;width:fit-content;margin-bottom:22px}
+  .tag .d{width:7px;height:7px;border-radius:50%;background:var(--rd);box-shadow:0 0 10px var(--rd);animation:b 1.4s infinite}@keyframes b{50%{opacity:.2}}
+  h1{font-weight:800;font-size:clamp(36px,6.5vw,80px);line-height:1.02;letter-spacing:-1.5px}
+  h1 .gr{background:linear-gradient(110deg,var(--tl),var(--bl));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:clamp(16px,2vw,21px);color:var(--muted);max-width:660px;margin:24px 0}
+  .by{font-size:14px;color:var(--muted)}.by b{color:var(--ink)}
+  .cta{display:flex;flex-wrap:wrap;gap:13px;margin-top:28px}
+  .btn{display:inline-flex;align-items:center;gap:9px;padding:14px 25px;border-radius:12px;font-weight:700;font-size:15px;transition:.18s;border:1px solid var(--line)}
+  .btn.p{background:linear-gradient(110deg,var(--tl),var(--bl));color:#04161a;border:none}.btn.p:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(34,211,197,.35)}
+  .btn.g{background:rgba(255,255,255,.03)}.btn.g:hover{border-color:var(--tl);color:var(--tl);transform:translateY(-3px)}
+  section{padding:48px 0}
+  .lbl{font-family:"JetBrains Mono";font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--bl);margin-bottom:8px}
+  .ttl{font-weight:800;font-size:clamp(23px,3.4vw,36px);margin-bottom:28px;letter-spacing:-.5px}
+  .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+  .stat{background:linear-gradient(160deg,#0d2127,#091418);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .stat .n{font-family:"JetBrains Mono";font-size:30px;font-weight:700;color:var(--tl)}
+  .stat .l{font-size:13px;color:var(--muted);margin-top:6px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .c{background:rgba(13,33,39,.55);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:18px;padding:26px;transition:.2s}
+  .c:hover{transform:translateY(-4px);border-color:rgba(34,211,197,.45)}
+  .c .ic{font-size:22px;margin-bottom:10px}.c h3{font-size:17px;margin-bottom:8px}.c p{font-size:14px;color:var(--muted)}
+  .c pre{font-family:"JetBrains Mono";font-size:12px;color:#a7e7e0;background:#06131a;border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:14px;overflow-x:auto}
+  footer{border-top:1px solid var(--line);margin-top:50px;padding:38px 0 56px;text-align:center;color:var(--muted);font-size:14px}
+  footer a{color:var(--tl)}.fl{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="bg"></div>
+<svg class="ekg" preserveAspectRatio="none" viewBox="0 0 1200 800"><path id="ek" fill="none" stroke="#22d3c5" stroke-width="1.6" opacity=".4"/></svg>
+<div class="wrap">
+  <header>
+    <span class="tag"><span class="d"></span>EDGE AI · HEALTHCARE IoT</span>
+    <h1>Catch the fall<br><span class="gr">on a $9 sensor.</span></h1>
+    <p class="lede">Falls are the leading cause of injury death over 65. This project runs a CNN+RNN fall detector on ESP32-cam devices — no raw video ever leaves the room. A temporal GRU reads the <i>dynamics</i> of a fall, slashing the false positives that plague single-frame systems.</p>
+    <p class="by">By <b>Ho Ko</b> · <b>Yueqi Liu</b> · <b>Jiaxin Xie</b> — ECE, University of Waterloo</p>
+    <div class="cta">
+      <a class="btn p" href="demo.html">▶ Pipeline Demo</a>
+      <a class="btn g" href="https://github.com/woodyhoko/Fall_Detection/blob/main/paper.pdf">📄 Read the Paper</a>
+      <a class="btn g" href="https://github.com/woodyhoko/Fall_Detection#readme">📖 Documentation</a>
+    </div>
+  </header>
+
+  <section>
+    <div class="lbl">why it matters</div>
+    <div class="ttl">Cheaper, private, plug-and-play.</div>
+    <div class="row">
+      <div class="stat"><div class="n">&lt; $9</div><div class="l">per ESP32-cam sensor node</div></div>
+      <div class="stat"><div class="n">&lt; 60s</div><div class="l">detection-to-alert target window</div></div>
+      <div class="stat"><div class="n">0 frames</div><div class="l">of raw video leave the device</div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="lbl">two-stage model</div>
+    <div class="ttl">Space, then time.</div>
+    <div class="grid">
+      <div class="c"><div class="ic">🧩</div><h3>Stage 1 — CNN</h3><p>A MobileNet-style depthwise-separable CNN extracts a 64-d spatial feature per frame at ~8–9× fewer FLOPs than standard convolutions.</p><pre>128×128 → DepthwiseSep×3 → GAP → f∈ℝ⁶⁴</pre></div>
+      <div class="c"><div class="ic">⏱️</div><h3>Stage 2 — GRU</h3><p>A 30-frame window (~1s) feeds a GRU that captures the vertical→horizontal→still signature — distinguishing a fall from intentional lying down.</p><pre>[f₋₂₉ … f₀] → GRU(64) → σ → P(fall)</pre></div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="fl"><a href="demo.html">Demo</a><a href="https://github.com/woodyhoko/Fall_Detection">GitHub</a><a href="https://github.com/woodyhoko/Fall_Detection#readme">README</a><a href="https://github.com/woodyhoko/Fall_Detection/blob/main/paper.pdf">Paper</a></div>
+    Built by <a href="https://github.com/woodyhoko">woodyhoko</a> · Fall Detection for IoT Small Sensors
+  </footer>
+</div>
+<script>
+  const p=document.getElementById('ek');let t=0;
+  function d(){t+=2.6;let s="M0 400",x=0;while(x<=1200){let seg=(x+t)%240;let y=400;if(seg>120&&seg<150){const k=(seg-120)/30;y=400-Math.sin(k*Math.PI)*120*(k<.5?1:-.4);}else{y=400+Math.sin(x*0.05)*4;}s+=` L${x} ${y.toFixed(1)}`;x+=6;}p.setAttribute('d',s);requestAnimationFrame(d);}
+  d();
+</script>
+</body></html>
