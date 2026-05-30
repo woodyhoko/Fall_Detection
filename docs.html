@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fall Detection for IoT Small Sensors — Documentation</title>
+<meta name="description" content="A lightweight fall-detection model designed for small IoT sensors.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Fall Detection for IoT Small Sensors — Documentation">
+<meta property="og:description" content="A lightweight fall-detection model designed for small IoT sensors.">
+<meta property="og:url" content="https://space.hoko.xyz/Fall_Detection/docs.html">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/styles/github-dark.min.css">
+<style>
+  :root{--bg:#071014;--panel:#0d1c22;--ink:#e6f6f7;--muted:#7fa3a8;--acc:#22d3c5;--acc2:#38bdf8;--line:rgba(255,255,255,.08)}
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",system-ui,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
+  /* top bar */
+  .bar{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;
+        padding:13px clamp(16px,4vw,40px);background:rgba(0,0,0,.35);backdrop-filter:blur(12px);
+        border-bottom:1px solid var(--line)}
+  .bar .brand{font-family:"Plus Jakarta Sans",sans-serif;font-weight:700;font-size:15px;letter-spacing:.3px;color:var(--ink);margin-right:auto;
+               display:inline-flex;align-items:center;gap:9px}
+  .bar .brand .dot{width:8px;height:8px;border-radius:50%;background:var(--acc);box-shadow:0 0 12px var(--acc)}
+  .nv{font-size:13.5px;color:var(--muted);white-space:nowrap;transition:.15s}
+  .nv:hover{color:var(--acc);text-decoration:none}
+  /* doc surface */
+  .doc{max-width:860px;margin:0 auto;padding:46px clamp(18px,5vw,28px) 120px}
+  .md{font-size:16px}
+  .md h1,.md h2,.md h3,.md h4{font-family:"Plus Jakarta Sans",sans-serif;line-height:1.25;margin:1.9em 0 .6em;font-weight:700}
+  .md h1{font-size:2em;margin-top:.2em;padding-bottom:.3em;border-bottom:1px solid var(--line)}
+  .md h2{font-size:1.5em;padding-bottom:.28em;border-bottom:1px solid var(--line)}
+  .md h3{font-size:1.22em} .md h4{font-size:1.05em}
+  .md p,.md li{color:var(--ink)}
+  .md a{color:var(--acc)}
+  .md strong{color:var(--ink)}
+  .md code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.88em;background:rgba(127,127,127,.16);
+            padding:.18em .42em;border-radius:6px}
+  .md pre{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--acc);border-radius:12px;
+           padding:16px 18px;overflow:auto;margin:1.1em 0}
+  .md pre code{background:none;padding:0;font-size:.86em;line-height:1.55}
+  .md blockquote{margin:1.1em 0;padding:.4em 1.1em;border-left:3px solid var(--acc2);
+                  background:rgba(127,127,127,.07);color:var(--muted);border-radius:0 8px 8px 0}
+  .md ul,.md ol{padding-left:1.5em} .md li{margin:.3em 0}
+  .md img{max-width:100%;height:auto;border-radius:10px}
+  .md hr{border:none;border-top:1px solid var(--line);margin:2em 0}
+  .md table{border-collapse:collapse;width:100%;margin:1.2em 0;font-size:.94em;display:block;overflow:auto}
+  .md th,.md td{border:1px solid var(--line);padding:8px 13px;text-align:left}
+  .md th{background:var(--panel)}
+  .md tr:nth-child(2n) td{background:rgba(127,127,127,.05)}
+  .md kbd{background:var(--panel);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;font-size:.85em}
+  .loading{color:var(--muted);font-size:14px}
+  footer{max-width:860px;margin:0 auto;padding:30px clamp(18px,5vw,28px) 60px;border-top:1px solid var(--line);
+          color:var(--muted);font-size:13.5px;display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center}
+  footer a{color:var(--acc)}
+  footer .sp{margin-left:auto}
+</style>
+</head>
+<body>
+  <nav class="bar">
+    <span class="brand"><span class="dot"></span>Fall Detection for IoT Small Sensors</span>
+      <a class="nv" href="index.html">⌂ Home</a>
+      <a class="nv" href="demo.html">▶ Demo</a>
+      <a class="nv" href="https://github.com/woodyhoko/Fall_Detection" target="_blank" rel="noopener">➤ View Source on GitHub</a>
+  </nav>
+  <main class="doc">
+    <article id="md" class="md"><p class="loading">Loading documentation…</p></article>
+  </main>
+  <footer>
+    <span>Documentation for <b>Fall Detection for IoT Small Sensors</b></span>
+    <span class="sp">Source: <a href="https://github.com/woodyhoko/Fall_Detection" target="_blank" rel="noopener">github.com/woodyhoko/Fall_Detection</a></span>
+  </footer>
+
+<script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
+<script>
+  var GH = "https://github.com/woodyhoko/Fall_Detection";
+  marked.setOptions({ gfm:true, breaks:false });
+  fetch("README.md", {cache:"no-cache"})
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.text(); })
+    .then(function(md){
+      var el = document.getElementById("md");
+      el.innerHTML = marked.parse(md);
+      // open external links in a new tab
+      el.querySelectorAll('a[href^="http"]').forEach(function(a){ a.target="_blank"; a.rel="noopener"; });
+      if (window.hljs) el.querySelectorAll('pre code').forEach(function(b){ try{ hljs.highlightElement(b); }catch(e){} });
+      document.title = (el.querySelector('h1') ? el.querySelector('h1').textContent + " — Docs" : document.title);
+    })
+    .catch(function(){
+      document.getElementById("md").innerHTML =
+        "<p>Couldn't load the README here. View it on " +
+        "<a href='" + GH + "#readme'>GitHub</a> instead.</p>";
+    });
+</script>
+</body>
+</html>
