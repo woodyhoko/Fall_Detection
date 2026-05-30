@@ -40,7 +40,13 @@
   .c pre{font-family:"JetBrains Mono";font-size:12px;color:#a7e7e0;background:#06131a;border:1px solid var(--line);border-radius:10px;padding:14px;margin-top:14px;overflow-x:auto}
   footer{border-top:1px solid var(--line);margin-top:50px;padding:38px 0 56px;text-align:center;color:var(--muted);font-size:14px}
   footer a{color:var(--tl)}.fl{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;margin-bottom:16px}
-  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  @media(max-width:640px){
+    .grid{grid-template-columns:1fr}
+    .wrap{padding:0 18px}
+    header{min-height:auto;padding:56px 0 28px}
+    .cta{gap:10px}.btn{padding:13px 18px;font-size:14px;flex:1 1 100%;justify-content:center}
+    section{padding:34px 0}.c{padding:20px}
+  }
 </style></head>
 <body>
 <div class="bg"></div>
@@ -52,7 +58,7 @@
     <p class="lede">Falls are the leading cause of injury death over 65. This project runs a CNN+RNN fall detector on ESP32-cam devices — no raw video ever leaves the room. A temporal GRU reads the <i>dynamics</i> of a fall, slashing the false positives that plague single-frame systems.</p>
     <p class="by">By <b>Ho Ko</b> · <b>Yueqi Liu</b> · <b>Jiaxin Xie</b> — ECE, University of Waterloo</p>
     <div class="cta">
-      <a class="btn p" href="demo.html">▶ Pipeline Demo</a>
+      <a class="btn p" href="demo.html">▶ Interactive Demo</a>
       <a class="btn g" href="paper.html">📄 Read the Paper</a>
       <a class="btn g" href="docs.html">📖 Documentation</a>
     </div>

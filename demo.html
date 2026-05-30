@@ -3,209 +3,220 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fall Detection — CNN+RNN IoT Pipeline Demo</title>
+<title>Fall Detection — Interactive Optical-Flow + RNN Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  :root{--bg:#0d1117;--pan:#161b22;--pan2:#11161e;--line:#2a3340;--ink:#e8eef6;--muted:#8b97a8;
+        --red:#fb6a6a;--grn:#3fd07a;--blu:#58a6ff;--amb:#f5b942}
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:#0d1117;color:#e6edf3;font-family:"Segoe UI",system-ui,sans-serif;padding:20px;min-height:100vh}
-  h1{font-size:20px;margin-bottom:4px;color:#f85149}
-  .sub{color:#8b949e;font-size:13px;margin-bottom:20px}
+  body{background:radial-gradient(1000px 500px at 80% -10%,#16202c 0,var(--bg) 55%) fixed,var(--bg);
+       color:var(--ink);font-family:Inter,system-ui,sans-serif;padding:22px 16px 40px;min-height:100vh;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto}
+  h1{font-family:"Space Grotesk";font-size:22px;font-weight:700;color:var(--red)}
+  .sub{color:var(--muted);font-size:13px;line-height:1.6;max-width:820px;margin:6px 0 12px}
+  .note{background:#1d1606;border:1px solid #f5b94255;border-left:4px solid var(--amb);border-radius:10px;
+        padding:11px 13px;margin-bottom:16px;font-size:12.5px;line-height:1.55;color:#f0e2c0;max-width:840px}
+  .note b{color:var(--amb)}
+  .btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+  button{padding:9px 16px;border:none;border-radius:9px;cursor:pointer;font-size:13px;font-weight:700;transition:.15s}
+  .bp{background:var(--red);color:#190707}.bp:hover{filter:brightness(1.08)}
+  .bs{background:#1d2531;color:var(--ink);border:1px solid var(--line)}.bs:hover{background:#26303d}
+  .ctlrow{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--muted);flex-wrap:wrap;margin-bottom:14px}
+  input[type=range]{accent-color:var(--red)}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-  @media(max-width:650px){.grid{grid-template-columns:1fr}}
-  .card{background:#161b22;border:1px solid #30363d;border-radius:12px;padding:16px}
-  h2{font-size:12px;color:#8b949e;margin-bottom:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-  canvas{width:100%;display:block;border-radius:6px;background:#0d1117}
-  .btns{display:flex;gap:8px;margin-bottom:16px}
-  button{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:.15s}
-  .bp{background:#f85149;color:#fff}
-  .bp:hover{filter:brightness(1.1)}
-  .bs{background:#21262d;color:#e6edf3}
-  .bs:hover{background:#2d333b}
-  .alert{padding:14px;border-radius:10px;font-size:15px;font-weight:600;text-align:center;margin-top:14px;transition:.4s;min-height:50px;display:flex;align-items:center;justify-content:center}
-  .alert.ok{background:#1a2b1a;border:2px solid #3fb95050;color:#3fb950}
-  .alert.warn{background:#2b1a1a;border:2px solid #f8514980;color:#f85149;animation:pulse .6s infinite}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.7}}
-  .stage-flow{display:flex;align-items:center;gap:0;margin:16px 0;overflow-x:auto;padding-bottom:4px}
-  .sf-box{background:#21262d;border-radius:8px;padding:8px 12px;font-size:12px;white-space:nowrap;border:2px solid transparent;transition:.3s;flex:0 0 auto}
-  .sf-box.active{background:#2b1f1f;border-color:#f85149;color:#f85149}
-  .sf-box.done{background:#162316;border-color:#3fb95060;color:#3fb950}
-  .sf-arrow{color:#30363d;font-size:18px;flex:0 0 auto;padding:0 4px}
-  .metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-  .metric{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:10px;text-align:center}
-  .metric .lbl{font-size:11px;color:#8b949e}
-  .metric .num{font-size:18px;font-weight:700;color:#f85149;font-variant-numeric:tabular-nums}
-  select,input[type=range]{accent-color:#f85149}
-  label{font-size:12px;color:#8b949e}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .card{background:linear-gradient(180deg,var(--pan),var(--pan2));border:1px solid var(--line);border-radius:13px;padding:14px}
+  h2{font-size:11.5px;color:var(--muted);margin-bottom:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+  canvas{width:100%;display:block;border-radius:8px;background:#0a0d13}
+  #feed{cursor:grab;touch-action:none}#feed:active{cursor:grabbing}
+  .feat{margin-bottom:9px}
+  .feat .l{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:3px}
+  .feat .l b{color:var(--ink);font-variant-numeric:tabular-nums}
+  .feat .bar{height:8px;background:#0a0d13;border-radius:4px;overflow:hidden}
+  .feat .bar i{display:block;height:100%;border-radius:4px;transition:width .12s}
+  .alert{padding:13px;border-radius:10px;font-size:15px;font-weight:700;text-align:center;margin-top:6px;transition:.3s;min-height:48px;display:flex;align-items:center;justify-content:center}
+  .alert.ok{background:#0f2417;border:2px solid #3fd07a55;color:var(--grn)}
+  .alert.warn{background:#2b1414;border:2px solid #fb6a6a;color:var(--red);animation:pulse .6s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:6px}
 </style>
 </head>
 <body>
-<h1>Fall Detection — IoT Pipeline</h1>
-<p class="sub">ESP32-cam + CNN feature extractor + RNN classifier. Simulate fall events and watch the detection pipeline respond in real time.</p>
+<div class="wrap">
+  <h1>Fall Detection — interactive optical-flow + RNN demo</h1>
+  <p class="sub"><b style="color:var(--ink)">Drag the person</b> around the scene and use the <b style="color:var(--ink)">body-tilt</b> slider — or hit <b style="color:var(--ink)">Trigger a fall</b>. The demo measures <b style="color:var(--ink)">real optical flow</b> (frame-to-frame pixel motion), plus the figure's downward velocity, acceleration spike and how horizontal it is, then feeds that sequence into a small <b style="color:var(--ink)">RNN-style temporal model</b>. When the motion actually looks like a fall — fast drop, impact deceleration, body going horizontal — the fall probability climbs and the alert fires.</p>
+  <div class="note">⚠️ <b>Simplified example.</b> The figure is a drawn silhouette and the recurrent model uses small hand-set weights (it isn't the trained CNN+RNN from the paper). The optical-flow and acceleration signals it reads are computed for real from your interaction — the point is to show <b>why temporal dynamics make a fall detectable</b>, not to reproduce the deployed ESP32-cam pipeline.</div>
 
-<div class="btns">
-  <button class="bp" id="fallBtn">💥 Simulate Fall</button>
-  <button class="bs" id="walkBtn">🚶 Normal Activity</button>
-  <button class="bs" id="restBtn">🛌 Floor Rest (hard case)</button>
-  <button class="bs" id="resetBtn">↺ Reset</button>
-</div>
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;font-size:12px;color:#8b949e">
-  <label for="threshSlider">Detection threshold:</label>
-  <input id="threshSlider" type="range" min="10" max="90" value="50" style="width:140px;accent-color:#f85149">
-  <span id="threshVal" style="color:#f85149;font-variant-numeric:tabular-nums;min-width:32px">0.50</span>
-  <span style="color:#8b949e">— lower = more sensitive, higher = fewer false alarms</span>
-</div>
-
-<div class="stage-flow">
-  <div class="sf-box" id="sf0">📹 ESP32-cam</div><div class="sf-arrow">→</div>
-  <div class="sf-box" id="sf1">🖼 Frame Buffer</div><div class="sf-arrow">→</div>
-  <div class="sf-box" id="sf2">🔬 CNN Features</div><div class="sf-arrow">→</div>
-  <div class="sf-box" id="sf3">⏱ RNN Sequence</div><div class="sf-arrow">→</div>
-  <div class="sf-box" id="sf4">🧠 Classifier</div><div class="sf-arrow">→</div>
-  <div class="sf-box" id="sf5">☁ Cloud Alert</div>
-</div>
-
-<div class="metric-row">
-  <div class="metric"><div class="lbl">Frame</div><div class="num" id="m-frame">0</div></div>
-  <div class="metric"><div class="lbl">CNN activations</div><div class="num" id="m-act">—</div></div>
-  <div class="metric"><div class="lbl">RNN hidden state</div><div class="num" id="m-rnn">—</div></div>
-  <div class="metric"><div class="lbl">Fall probability</div><div class="num" id="m-prob">0%</div></div>
-</div>
-
-<div class="grid">
-  <div class="card">
-    <h2>Simulated Camera Feed</h2>
-    <canvas id="feed" height="200"></canvas>
+  <div class="btns">
+    <button class="bp" id="fallBtn">⤵ Trigger a fall</button>
+    <button class="bs" id="standBtn">🧍 Stand up</button>
+    <button class="bs" id="resetBtn">↺ Reset signals</button>
   </div>
-  <div class="card">
-    <h2>CNN Feature Map (layer 2)</h2>
-    <canvas id="feat" height="200"></canvas>
+  <div class="ctlrow">
+    <label for="tilt">Body tilt</label>
+    <input id="tilt" type="range" min="0" max="90" value="0" style="width:150px">
+    <span id="tiltVal" style="color:var(--red);min-width:38px">0°</span>
+    <span style="margin-left:auto"></span>
+    <label for="thresh">Alert threshold</label>
+    <input id="thresh" type="range" min="20" max="90" value="55" style="width:130px">
+    <span id="threshVal" style="color:var(--red);min-width:34px">0.55</span>
   </div>
-  <div class="card">
-    <h2>RNN Hidden State Over Time</h2>
-    <canvas id="rnnChart" height="180"></canvas>
-  </div>
-  <div class="card">
-    <h2>Fall Probability Signal</h2>
-    <canvas id="probChart" height="180"></canvas>
-  </div>
-</div>
 
-<div class="alert ok" id="alertBox">✅ No fall detected — system monitoring</div>
+  <div class="grid">
+    <div class="card">
+      <h2>Scene — drag the person 🖐</h2>
+      <canvas id="feed" height="240"></canvas>
+      <div class="hint">Tip: a slow shuffle barely moves the needle; a fast drop + tilt to horizontal makes the RNN fire.</div>
+    </div>
+    <div class="card">
+      <h2>Live signals (measured)</h2>
+      <div class="feat"><div class="l">Optical flow (pixel motion) <b id="vFlow">0.00</b></div><div class="bar"><i id="bFlow" style="background:var(--blu);width:0%"></i></div></div>
+      <div class="feat"><div class="l">Downward velocity <b id="vVel">0.00</b></div><div class="bar"><i id="bVel" style="background:var(--amb);width:0%"></i></div></div>
+      <div class="feat"><div class="l">Acceleration / impact <b id="vAcc">0.00</b></div><div class="bar"><i id="bAcc" style="background:var(--red);width:0%"></i></div></div>
+      <div class="feat"><div class="l">Body horizontality <b id="vHor">0.00</b></div><div class="bar"><i id="bHor" style="background:#a371f7;width:0%"></i></div></div>
+      <div class="feat" style="margin-top:14px"><div class="l">RNN hidden state (fall evidence) <b id="vRnn">0.00</b></div><div class="bar"><i id="bRnn" style="background:var(--grn);width:0%"></i></div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:14px">
+    <h2>Fall probability over time</h2>
+    <canvas id="prob" height="150"></canvas>
+  </div>
+
+  <div class="alert ok" id="alertBox">✅ No fall detected — monitoring</div>
+</div>
 
 <script>
-let frameNum=0,raf=null,running=true;
-let activity='walk'; // walk | fall | rest
-let fallProbs=[],rnnStates=[];
-let THRESHOLD=0.5;
-document.getElementById('threshSlider').oninput=e=>{THRESHOLD=e.target.value/100;document.getElementById('threshVal').textContent=THRESHOLD.toFixed(2);};
-let alertActive=false,alertFrames=0;
+const feed=document.getElementById('feed'), fctx=feed.getContext('2d');
+const probCv=document.getElementById('prob'), pctx=probCv.getContext('2d');
+const off=document.createElement('canvas'); off.width=64; off.height=40; const octx=off.getContext('2d');
 
-function sigmoid(x){return 1/(1+Math.exp(-x));}
-function fallProb(){
-  if(activity==='fall')return .15+Math.min(.85,alertFrames*.07)+Math.random()*.06;
-  if(activity==='rest')return .1+Math.sin(frameNum*.1)*.12+Math.random()*.08;
-  return Math.max(0,.04+Math.random()*.05-.02);
-}
+let DPR=Math.min(devicePixelRatio||1,2);
+function sizeFeed(){feed.width=feed.clientWidth*DPR;feed.height=240*DPR;fctx.setTransform(DPR,0,0,DPR,0,0);}
+sizeFeed(); addEventListener('resize',()=>{sizeFeed();});
 
-function drawFeed(){
-  const cv=document.getElementById('feed'),ctx=cv.getContext('2d');
-  const W=cv.clientWidth*devicePixelRatio,H=cv.clientHeight*devicePixelRatio;
-  cv.width=W;cv.height=H;
-  // background
-  ctx.fillStyle='#1a1a2a';ctx.fillRect(0,0,W,H);
-  // floor line
-  const floorY=H*.72;
-  ctx.fillStyle='#252535';ctx.fillRect(0,floorY,W,H-floorY);
-  ctx.strokeStyle='#30303a';ctx.lineWidth=1;
-  for(let x=0;x<W;x+=W/8){ctx.beginPath();ctx.moveTo(x,floorY);ctx.lineTo(x,H);ctx.stroke();}
+// person state in normalized [0..1] scene coords; tilt in radians (0 upright, PI/2 lying)
+let px=0.5, py=0.42, tilt=0;
+let prevX=px, prevY=py, vx=0, vy=0, prevVy=0;
+let prevPixels=null;
+let h=0;                        // RNN hidden state
+let probs=[]; let THRESH=0.55;
+let dragging=false, falling=false, fallT=0;
 
-  // person shape depends on activity
-  const cx=W/2,cy=activity==='fall'?floorY-20:floorY-H*.35;
-  const angle=activity==='fall'?-Math.PI/2+Math.sin(frameNum*.05)*.1:Math.sin(frameNum*.04)*.04;
-  ctx.save();ctx.translate(cx,activity==='fall'?floorY-H*.08:cy);ctx.rotate(angle);
-  // body
-  ctx.fillStyle='#5a7ab0';
-  if(activity==='fall'){ctx.fillRect(-W*.18,-H*.06,W*.36,H*.12);}// lying
-  else{ctx.fillRect(-W*.06,-H*.22,W*.12,H*.24);}// standing
-  // head
-  ctx.fillStyle='#c68642';const headR=activity==='fall'?H*.08:H*.09;
-  const headX=activity==='fall'?W*.18:0,headY=activity==='fall'?0:-H*.28;
-  ctx.beginPath();ctx.arc(headX,headY,headR,0,Math.PI*2);ctx.fill();
+const tiltEl=document.getElementById('tilt'), threshEl=document.getElementById('thresh');
+tiltEl.oninput=e=>{if(!falling){tilt=e.target.value*Math.PI/180;}document.getElementById('tiltVal').textContent=e.target.value+'°';};
+threshEl.oninput=e=>{THRESH=e.target.value/100;document.getElementById('threshVal').textContent=THRESH.toFixed(2);};
+
+// ---- pointer drag ----
+function ptr(e){const r=feed.getBoundingClientRect();const cx=(e.touches?e.touches[0].clientX:e.clientX)-r.left;const cy=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+  px=Math.max(0.06,Math.min(0.94,cx/r.width)); py=Math.max(0.12,Math.min(0.9,cy/240));}
+feed.addEventListener('pointerdown',e=>{dragging=true;falling=false;feed.setPointerCapture(e.pointerId);ptr(e);});
+feed.addEventListener('pointermove',e=>{if(dragging)ptr(e);});
+feed.addEventListener('pointerup',()=>dragging=false);
+feed.addEventListener('pointercancel',()=>dragging=false);
+
+// ---- drawing ----
+function drawScene(ctx,W,H,scale){
+  ctx.fillStyle='#11161f';ctx.fillRect(0,0,W,H);
+  const floorY=H*0.84;
+  ctx.fillStyle='#1b2230';ctx.fillRect(0,floorY,W,H-floorY);
+  ctx.strokeStyle='#283344';ctx.lineWidth=1;for(let x=0;x<W;x+=W/9){ctx.beginPath();ctx.moveTo(x,floorY);ctx.lineTo(x,H);ctx.stroke();}
+  // person
+  const cx=px*W, cy=py*H, s=scale;
+  ctx.save();ctx.translate(cx,cy);ctx.rotate(tilt);
+  const bw=14*s, bh=46*s, hr=11*s;
+  ctx.fillStyle='#5b86c4';                                  // torso
+  ctx.fillRect(-bw/2,-bh*0.3,bw,bh);
+  ctx.strokeStyle='#5b86c4';ctx.lineWidth=5*s;ctx.lineCap='round';  // legs
+  ctx.beginPath();ctx.moveTo(-bw*0.25,bh*0.7);ctx.lineTo(-bw*0.5,bh*1.15);ctx.moveTo(bw*0.25,bh*0.7);ctx.lineTo(bw*0.5,bh*1.15);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(-bw*0.4,-bh*0.15);ctx.lineTo(-bw*0.9,bh*0.25);ctx.moveTo(bw*0.4,-bh*0.15);ctx.lineTo(bw*0.9,bh*0.25);ctx.stroke(); // arms
+  ctx.fillStyle='#d6a06a';ctx.beginPath();ctx.arc(0,-bh*0.3-hr,hr,0,7);ctx.fill();  // head
   ctx.restore();
-  // scan lines (camera effect)
-  ctx.fillStyle='rgba(0,0,0,.06)';
-  for(let y=0;y<H;y+=4){ctx.fillRect(0,y,W,2);}
-  // timestamp
-  ctx.fillStyle='rgba(255,255,255,.5)';ctx.font=`${10*devicePixelRatio}px monospace`;
-  ctx.fillText('ESP32-CAM  F:'+frameNum,8,16*devicePixelRatio);
+}
+function render(){
+  const W=feed.clientWidth,H=240;
+  drawScene(fctx,W,H,1);
+  // camera scanlines
+  fctx.fillStyle='rgba(0,0,0,.05)';for(let y=0;y<H;y+=4)fctx.fillRect(0,y,W,2);
+  fctx.fillStyle='rgba(255,255,255,.45)';fctx.font='10px ui-monospace,monospace';fctx.fillText('ESP32-CAM (simulated)',8,16);
 }
 
-function drawFeat(){
-  const cv=document.getElementById('feat'),ctx=cv.getContext('2d');
-  const W=cv.clientWidth*devicePixelRatio,H=cv.clientHeight*devicePixelRatio;
-  cv.width=W;cv.height=H;
-  const rows=8,cols=16,cw=W/cols,ch=H/rows;
-  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
-    const base=activity==='fall'?(c<6&&r>3?.9:c>10&&r<4?.7:.2):(r%2+c%3)*.18;
-    const val=Math.max(0,Math.min(1,base+Math.sin(frameNum*.1+c+r)*.1+Math.random()*.05));
-    const hue=activity==='fall'?0:200;
-    ctx.fillStyle=`hsla(${hue},80%,${20+val*60}%,1)`;ctx.fillRect(c*cw+1,r*ch+1,cw-2,ch-2);
+// ---- real optical flow: render scene small, diff vs previous frame ----
+function opticalFlow(){
+  drawScene(octx,off.width,off.height,off.height/240);
+  const cur=octx.getImageData(0,0,off.width,off.height).data;
+  let diff=0;
+  if(prevPixels){for(let i=0;i<cur.length;i+=4){diff+=Math.abs(cur[i]-prevPixels[i])+Math.abs(cur[i+1]-prevPixels[i+1])+Math.abs(cur[i+2]-prevPixels[i+2]);}}
+  prevPixels=cur.slice(0);
+  const meanDiff=diff/(off.width*off.height*3);   // 0..255-ish
+  return Math.min(1, meanDiff/26);                 // normalize to 0..1
+}
+
+const clamp01=v=>v<0?0:v>1?1:v;
+const sigmoid=x=>1/(1+Math.exp(-x));
+
+let last=performance.now();
+function loop(now){
+  const dt=Math.max(0.016,Math.min(0.05,(now-last)/1000)); last=now;
+
+  // scripted fall animation
+  if(falling){
+    fallT+=dt;
+    const t=Math.min(1,fallT/0.55);
+    py=0.42+(0.78-0.42)*(t*t);                // accelerating drop
+    tilt=(Math.PI/2)*Math.min(1,t*1.3);        // rotate to horizontal
+    if(t>=1){falling=false;}
+    tiltEl.value=Math.round(tilt*180/Math.PI);document.getElementById('tiltVal').textContent=tiltEl.value+'°';
+  }
+
+  // kinematics (normalized units / sec)
+  vx=(px-prevX)/dt; vy=(py-prevY)/dt; prevX=px; prevY=py;
+  const acc=(vy-prevVy)/dt; prevVy=vy;
+  const flow=opticalFlow();
+  const vDownN=clamp01(vy/1.6);                  // downward only
+  const accN=clamp01(Math.abs(acc)/14);
+  const horiz=clamp01(Math.sin(tilt));
+
+  // RNN-style leaky integrator: evidence accrues fast under motion, decays when calm.
+  const drive = 1.7*vDownN + 1.2*accN + 1.0*flow + 1.5*horiz - 1.15;
+  const target = sigmoid(3.2*drive);
+  const reactivity = 0.12 + 0.6*clamp01(flow+accN);    // gate: react faster during motion
+  h += (target - h)*reactivity;
+  h = clamp01(h - (horiz<0.3?0.015:0));                // slowly forget when standing & calm
+  const prob = clamp01(h);
+
+  probs.push(prob); if(probs.length>110)probs.shift();
+
+  // UI
+  render();
+  const setBar=(v,b,val)=>{document.getElementById(v).textContent=val.toFixed(2);document.getElementById(b).style.width=(val*100).toFixed(0)+'%';};
+  setBar('vFlow','bFlow',flow);setBar('vVel','bVel',vDownN);setBar('vAcc','bAcc',accN);setBar('vHor','bHor',horiz);setBar('vRnn','bRnn',h);
+  drawProb();
+  const box=document.getElementById('alertBox');
+  if(prob>THRESH){box.className='alert warn';box.textContent='🚨 FALL DETECTED — alerting caregiver';}
+  else{box.className='alert ok';box.textContent='✅ No fall detected — monitoring';}
+
+  requestAnimationFrame(loop);
+}
+function drawProb(){
+  const W=probCv.clientWidth,H=150;probCv.width=W*DPR;probCv.height=H*DPR;pctx.setTransform(DPR,0,0,DPR,0,0);
+  pctx.fillStyle='#0a0d13';pctx.fillRect(0,0,W,H);
+  const pad={l:34,r:8,t:10,b:16};
+  pctx.strokeStyle='#1e2734';pctx.lineWidth=1;pctx.font='9px ui-monospace,monospace';
+  [0,.25,.5,.75,1].forEach(v=>{const y=pad.t+(1-v)*(H-pad.t-pad.b);pctx.beginPath();pctx.moveTo(pad.l,y);pctx.lineTo(W-pad.r,y);pctx.stroke();pctx.fillStyle='#8b97a8';pctx.fillText(v.toFixed(2),4,y+3);});
+  // threshold
+  const ty=pad.t+(1-THRESH)*(H-pad.t-pad.b);pctx.strokeStyle='#fb6a6a66';pctx.setLineDash([5,4]);pctx.beginPath();pctx.moveTo(pad.l,ty);pctx.lineTo(W-pad.r,ty);pctx.stroke();pctx.setLineDash([]);
+  if(probs.length>1){
+    pctx.beginPath();probs.forEach((v,i)=>{const x=pad.l+i/(probs.length-1)*(W-pad.l-pad.r),y=pad.t+(1-v)*(H-pad.t-pad.b);i?pctx.lineTo(x,y):pctx.moveTo(x,y);});
+    pctx.strokeStyle='#fb6a6a';pctx.lineWidth=2;pctx.stroke();
+    pctx.lineTo(W-pad.r,H-pad.b);pctx.lineTo(pad.l,H-pad.b);pctx.closePath();pctx.fillStyle='rgba(251,106,106,.14)';pctx.fill();
   }
 }
 
-function drawLineChart(canvasId,data,color,yLabel,threshold){
-  const cv=document.getElementById(canvasId),ctx=cv.getContext('2d');
-  const W=cv.clientWidth*devicePixelRatio,H=cv.clientHeight*devicePixelRatio;
-  cv.width=W;cv.height=H;
-  const pad={l:36,r:8,t:10,b:20};
-  ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle='#21262d';ctx.lineWidth=1;
-  [0,.25,.5,.75,1].forEach(v=>{const y=pad.t+(1-v)*(H-pad.t-pad.b);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.fillStyle='#8b949e';ctx.font=`${8*devicePixelRatio}px monospace`;ctx.fillText(v.toFixed(2),2,y+3);});
-  if(threshold!==undefined){const ty=pad.t+(1-threshold)*(H-pad.t-pad.b);ctx.strokeStyle='#f8514950';ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(pad.l,ty);ctx.lineTo(W-pad.r,ty);ctx.stroke();ctx.setLineDash([]);}
-  if(data.length<2)return;
-  ctx.beginPath();
-  data.forEach((v,i)=>{const x=pad.l+i/(data.length-1)*(W-pad.l-pad.r),y=pad.t+(1-v)*(H-pad.t-pad.b);i?ctx.lineTo(x,y):ctx.moveTo(x,y);});
-  ctx.strokeStyle=color;ctx.lineWidth=2*devicePixelRatio;ctx.stroke();
-  ctx.lineTo(W-pad.r,H-pad.b);ctx.lineTo(pad.l,H-pad.b);ctx.closePath();ctx.fillStyle=color+'18';ctx.fill();
-}
-
-async function setFlow(idx){
-  for(let i=0;i<6;i++){const el=document.getElementById('sf'+i);el.className='sf-box'+(i<idx?' done':i===idx?' active':'');}
-}
-
-function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
-
-async function processFrame(){
-  const prob=fallProb();
-  fallProbs.push(prob);if(fallProbs.length>80)fallProbs.shift();
-  const rnnVal=sigmoid((prob-.3)*6+Math.sin(frameNum*.08)*.2);
-  rnnStates.push(rnnVal);if(rnnStates.length>80)rnnStates.shift();
-  setFlow(1);drawFeed();
-  setFlow(2);drawFeat();
-  setFlow(3);
-  const cnnAct=(Math.random()*30+prob*200).toFixed(0);
-  document.getElementById('m-frame').textContent=frameNum;
-  document.getElementById('m-act').textContent=cnnAct;
-  document.getElementById('m-rnn').textContent=(rnnVal).toFixed(3);
-  document.getElementById('m-prob').textContent=(prob*100).toFixed(0)+'%';
-  setFlow(4);
-  drawLineChart('rnnChart',rnnStates,'#58a6ff','RNN state');
-  drawLineChart('probChart',fallProbs,'#f85149','P(fall)',THRESHOLD);
-  if(prob>THRESHOLD){setFlow(5);document.getElementById('alertBox').className='alert warn';document.getElementById('alertBox').textContent='🚨 FALL DETECTED — Sending alert to cloud';}
-  else{setFlow(-1);if(alertActive&&alertFrames>5){alertActive=false;alertFrames=0;}document.getElementById('alertBox').className='alert ok';document.getElementById('alertBox').textContent='✅ No fall detected — system monitoring';}
-  if(activity==='fall')alertFrames++;
-}
-
-let lastT=0;
-function loop(ts){
-  if(!running)return;
-  if(ts-lastT>120){lastT=ts;frameNum++;processFrame();}
-  raf=requestAnimationFrame(loop);
-}
-
-document.getElementById('fallBtn').onclick=()=>{activity='fall';alertFrames=0;};
-document.getElementById('walkBtn').onclick=()=>{activity='walk';alertFrames=0;};
-document.getElementById('restBtn').onclick=()=>{activity='rest';alertFrames=0;};
-document.getElementById('resetBtn').onclick=()=>{activity='walk';frameNum=0;fallProbs=[];rnnStates=[];alertFrames=0;alertActive=false;document.getElementById('alertBox').className='alert ok';document.getElementById('alertBox').textContent='✅ No fall detected — system monitoring';};
+document.getElementById('fallBtn').onclick=()=>{falling=true;fallT=0;};
+document.getElementById('standBtn').onclick=()=>{falling=false;py=0.42;tilt=0;tiltEl.value=0;document.getElementById('tiltVal').textContent='0°';};
+document.getElementById('resetBtn').onclick=()=>{probs=[];h=0;falling=false;py=0.42;tilt=0;tiltEl.value=0;document.getElementById('tiltVal').textContent='0°';};
 
 requestAnimationFrame(loop);
 </script>
