@@ -47,6 +47,15 @@
     .cta{gap:10px}.btn{padding:13px 18px;font-size:14px;flex:1 1 100%;justify-content:center}
     section{padding:34px 0}.c{padding:20px}
   }
+  .demo-card{border:1px solid var(--line);border-radius:16px;overflow:hidden;background:rgba(0,0,0,.22);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+  .demo-bar{display:flex;align-items:center;gap:7px;padding:10px 15px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.02)}
+  .demo-bar i{width:11px;height:11px;border-radius:50%;display:inline-block}
+  .demo-bar .t{margin-left:10px;font-size:12px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+  .demo-frame{position:relative;width:100%;aspect-ratio:16/10;background:#0b0c12}
+  .demo-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+  .demo-cap{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-top:16px}
+  .demo-cap p{font-size:13px;color:var(--muted);max-width:560px}
+  @media(max-width:640px){.demo-frame{aspect-ratio:3/4}}
 </style></head>
 <body>
 <div class="bg"></div>
@@ -80,6 +89,19 @@
     <div class="grid">
       <div class="c"><div class="ic">🧩</div><h3>Stage 1 — CNN</h3><p>A MobileNet-style depthwise-separable CNN extracts a 64-d spatial feature per frame at ~8–9× fewer FLOPs than standard convolutions.</p><pre>128×128 → DepthwiseSep×3 → GAP → f∈ℝ⁶⁴</pre></div>
       <div class="c"><div class="ic">⏱️</div><h3>Stage 2 — GRU</h3><p>A 30-frame window (~1s) feeds a GRU that captures the vertical→horizontal→still signature — distinguishing a fall from intentional lying down.</p><pre>[f₋₂₉ … f₀] → GRU(64) → σ → P(fall)</pre></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="lbl">live demo</div>
+    <div class="ttl">See it flag a fall.</div>
+    <div class="demo-card">
+      <div class="demo-bar"><i style="background:#ff5f56"></i><i style="background:#ffbd2e"></i><i style="background:#27c93f"></i><span class="t">demo.html — fall-detection pipeline</span></div>
+      <div class="demo-frame"><iframe src="demo.html" loading="lazy" title="Interactive fall-detection pipeline demo"></iframe></div>
+    </div>
+    <div class="demo-cap">
+      <p>Step through the CNN→GRU pipeline on sample clips and watch the fall probability spike as the vertical→horizontal→still signature of a real fall unfolds.</p>
+      <a class="btn p" href="demo.html">▶ Open full demo</a>
     </div>
   </section>
 
