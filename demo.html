@@ -41,6 +41,41 @@
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.65}}
   .hint{font-size:11.5px;color:var(--muted);margin-top:6px}
 </style>
+<!--uxpolish-->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🚨%3C/text%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Fall Detection — Interactive Optical-Flow + RNN Demo">
+<meta property="og:url" content="https://woodyhoko.github.io/Fall_Detection/demo.html">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#0d1117">
+
+<style id="uxpolish-css">
+::selection{background:rgba(251,106,106,.55);color:#fff}
+*{-webkit-tap-highlight-color:transparent}
+body{-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:rgba(251,106,106,.35);border-radius:8px;border:3px solid #0d1117}
+::-webkit-scrollbar-thumb:hover{background:rgba(251,106,106,.6)}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #fb6a6a;outline-offset:2px}
+</style>
+<style id="uxpolish-motion">
+@media (prefers-reduced-motion: no-preference){
+header>*{opacity:0;transform:translateY(22px);animation:uxHero .85s cubic-bezier(.22,1,.36,1) forwards}
+header>*:nth-child(2){animation-delay:.1s}header>*:nth-child(3){animation-delay:.2s}
+header>*:nth-child(4){animation-delay:.3s}header>*:nth-child(5){animation-delay:.4s}
+header>*:nth-child(6){animation-delay:.5s}
+@keyframes uxHero{to{opacity:1;transform:none}}
+.ux-rv{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.22,1,.36,1),transform .7s cubic-bezier(.22,1,.36,1);transition-delay:var(--ux-d,0s)}
+.ux-rv.ux-in{opacity:1;transform:none}
+}
+.c,.step{position:relative;overflow:hidden}
+.c::after,.step::after{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;transition:opacity .35s;background:radial-gradient(320px circle at var(--ux-mx,50%) var(--ux-my,50%),rgba(251,106,106,.13),transparent 62%);pointer-events:none}
+.c:hover::after,.step:hover::after{opacity:1}
+.btn{position:relative;overflow:hidden}
+.btn::before{content:"";position:absolute;top:0;left:-90%;width:55%;height:100%;background:linear-gradient(105deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);transition:left .55s ease;pointer-events:none}
+.btn:hover::before{left:135%}
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -219,6 +254,32 @@ document.getElementById('standBtn').onclick=()=>{falling=false;py=0.42;tilt=0;ti
 document.getElementById('resetBtn').onclick=()=>{probs=[];h=0;falling=false;py=0.42;tilt=0;tiltEl.value=0;document.getElementById('tiltVal').textContent='0°';};
 
 requestAnimationFrame(loop);
+</script>
+
+<script id="uxpolish-js">
+(function(){
+  var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(!reduced&&'IntersectionObserver' in window){
+    var targets=[];
+    document.querySelectorAll('section').forEach(function(sec){
+      var kids=sec.querySelectorAll('.grid>.c,.steps>.step,.vid>a');
+      sec.querySelectorAll(':scope>.lbl,:scope>.ttl').forEach(function(el){targets.push([el,0]);});
+      if(kids.length){kids.forEach(function(el,i){targets.push([el,Math.min(i*70,420)]);});}
+      else{sec.querySelectorAll(':scope>*:not(.lbl):not(.ttl)').forEach(function(el){targets.push([el,80]);});}
+    });
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('ux-in');io.unobserve(e.target);}});
+    },{threshold:.08,rootMargin:'0px 0px -6% 0px'});
+    targets.forEach(function(t){t[0].classList.add('ux-rv');t[0].style.setProperty('--ux-d',(t[1]/1000)+'s');io.observe(t[0]);});
+  }
+  document.querySelectorAll('.c,.step').forEach(function(card){
+    card.addEventListener('pointermove',function(ev){
+      var r=card.getBoundingClientRect();
+      card.style.setProperty('--ux-mx',(ev.clientX-r.left)+'px');
+      card.style.setProperty('--ux-my',(ev.clientY-r.top)+'px');
+    });
+  });
+})();
 </script>
 </body>
 </html>
